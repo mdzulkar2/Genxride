@@ -1,9 +1,13 @@
-import Image from "next/image";
+import PublicHome from "@/components/publicHome";
+import { Nav } from "@/components/nav";
+import Footer from "@/components/footer";
 
 export default function Home() {
   return (
-  <div>
-    
-  </div>
+    <div className="w-full min-h-screen bg-white">
+      <Nav />        {/* ✅ correct */}
+      <PublicHome /> {/* ✅ correct */}
+      <Footer />     {/* ✅ correct */}
+    </div>
   );
 }

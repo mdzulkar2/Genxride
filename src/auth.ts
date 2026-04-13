@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials"
 import bcrypt  from "bcryptjs"
 import User from "./models/User"
 import connectToDatabase from "./lib/db"
+import Google from "@auth/core/providers/google"
 
 declare module "next-auth" {
   interface User {
@@ -16,7 +17,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module "@auth/core/jwt" {
   interface JWT {
     role?: string;
   }
@@ -57,9 +58,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         role:user.role
       }
   },
+}),
+Google({
+  clientId: process.env.AUTH_GOOGLE_ID as string,
+  clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
 })
   ],
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (account?.provider === "google") {
+        await connectToDatabase();
+        let existingUser = await User.findOne({ email: user.email });
+        if (!existingUser) {
+          existingUser = new User({
+            name: user.name,
+            email: user.email,
+            image: user.image,
+          });
+          await existingUser.save();
+        }
+      }
+      return true;
+    },
+
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -68,7 +89,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role;
       }
       return token;
-    }
+    },
     async session({ session, token }) {
       if(session.user){
         session.user.name = token.name as string;
@@ -85,4 +106,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  secret:process.env.AUTH_SECRET
 })
