@@ -5,14 +5,14 @@ import Vehicle from './vehicle';
 import AuthModel from './authModel';
 
 const PublicHome: React.FC = () => {
-    const[authopen,setAuthopen]=useState(false)
+  const [authopen, setAuthopen] = useState(true);
+
   return (
-  <>
-    
-    <Hero/>
-    <Vehicle/>
-    [/*<AuthModel open={authopen} onClose={() => setAuthopen(false)}/>*/]
-  </>
+    <>
+      <Hero />
+      <Vehicle />
+      <AuthModel open={authopen} onClose={() => setAuthopen(false)} />
+    </>
   );
 };
 
